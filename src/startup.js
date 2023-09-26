@@ -42,11 +42,22 @@ function createGCPConfig() {
   const envVariables = {};
 
   specificVariables.forEach((item) => {
-    envVariables[item] = process.env[item];
+    if (item === "private_key") {
+      const myEnvVar = process.env.private_key;
+      const formattedEnvVar = myEnvVar.replace(/\\n/g, "\n");
+
+      console.log("formatted env var is ", formattedEnvVar);
+
+      envVariables["private_key"] = formattedEnvVar;
+    } else {
+      envVariables[item] = process.env[item];
+    }
   });
 
   const filePath = path.join(__dirname, "specific_env_variables.json");
   const jsonContent = JSON.stringify(envVariables, null, 2);
+
+  // Replace "\n" with actual newline character
 
   // Write JSON content to a file
   fs.writeFileSync(filePath, jsonContent, "utf-8");
