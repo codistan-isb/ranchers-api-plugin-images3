@@ -34,9 +34,14 @@ export default async function gcpUpload(req, res) {
   try {
     //   console.log("req", req);
     let file = req.files.photos;
+    console.log("file name is ", file.name);
+
     let isMulti = req.body.isMulti;
     let uploadPath = req.body.uploadPath;
+    let uploadName = file.name;
     //   console.log("file ", file);
+
+    const currentTime = Date.now();
     if (!file) {
       res.status(400).send("No file uploaded.");
       return;
@@ -71,10 +76,15 @@ export default async function gcpUpload(req, res) {
           fit: sharp.fit[fit],
           withoutEnlargement: true,
         })
-        .webp({ lossless: false, alphaQuality: 50, quality: 80 })
+        .webp({ lossless: true, alphaQuality: 50, quality: 80 })
         .toBuffer();
       // console.log("name ", `${req.body.uploadPath}${name}-${file.name}`);
-      const blob = bucket.file(`${req.body.uploadPath}${name}-${file.name}`);
+      const fileURI = `${uploadPath}${name}-${currentTime}-${
+        uploadName.split(".")[0]
+      }.webp`;
+      const blob = bucket.file(fileURI);
+
+      console.log("blob created is ", blob);
 
       const blobStream = blob.createWriteStream({
         metadata: {
@@ -94,7 +104,8 @@ export default async function gcpUpload(req, res) {
         new Promise((resolve, reject) => {
           blobStream.on("finish", async (_) => {
             await blob.makePublic();
-            const publicUrl = blob.publicUrl();
+            const publicUrl = `${process.env.CANONICAL_URL}${fileURI}`;
+
             urls.push(publicUrl);
             availableSizes[name] = publicUrl;
             resolve();
