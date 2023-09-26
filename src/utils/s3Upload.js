@@ -43,39 +43,56 @@ export async function generateThumbs(filename, uploadName, key) {
     });
 }
 
-export async function S3UploadImage(fileContent, uploadName, key, fileType, uploadPath) {
+export async function S3UploadImage(
+  fileContent,
+  uploadName,
+  key,
+  fileType,
+  uploadPath
+) {
   try {
     const currentTime = Date.now();
     const urlsArray = [];
-    let urlsArrayObj={
-      "image":{},
-      "large":{},
-      "medium":{},
-      "small":{},
-      "thumbnail":{},
-  };
+    let urlsArrayObj = {
+      image: {},
+      large: {},
+      medium: {},
+      small: {},
+      thumbnail: {},
+    };
     if (fileType === "image") {
-      const resizedImages = await Promise.all(imgTransforms.map(async (transform) => {
-        let { name, size, fit, format, type } = transform;
-        return await sharp(fileContent)
-          .resize({
-            height: size,
-            fit: sharp.fit[fit],
-            withoutEnlargement: true,
-          })
-          .webp({ lossless: false, alphaQuality: 50, quality: 80 })
-          .toBuffer();
-      }));
+      const resizedImages = await Promise.all(
+        imgTransforms.map(async (transform) => {
+          let { name, size, fit, format, type } = transform;
+          return await sharp(fileContent)
+            .resize({
+              height: size,
+              fit: sharp.fit[fit],
+              withoutEnlargement: true,
+            })
+            .webp({ lossless: false, alphaQuality: 50, quality: 80 })
+            .toBuffer();
+        })
+      );
 
-      await Promise.all(resizedImages.map(async (image, index) => {
-        const params = {
-          Bucket: BUCKET_NAME,
-          Key: `${uploadPath}/${imgTransforms[index].name}-${currentTime}-${uploadName.split(".")[0]}.webp`,
-          Body: image,
-        };
-        const { Location } = await s3.upload(params).promise();
-        urlsArray.push(Location);
-      }));
+      await Promise.all(
+        resizedImages.map(async (image, index) => {
+          console.log("map count is ", image);
+
+          const params = {
+            Bucket: BUCKET_NAME,
+            Key: `${uploadPath}/${imgTransforms[index].name}-${currentTime}-${
+              uploadName.split(".")[0]
+            }.webp`,
+            Body: image,
+          };
+          const { Location } = await s3.upload(params).promise();
+
+          console.log("location is ", index, Location);
+
+          urlsArray.push(Location);
+        })
+      );
     } else {
       const params = {
         Bucket: BUCKET_NAME,
@@ -85,13 +102,12 @@ export async function S3UploadImage(fileContent, uploadName, key, fileType, uplo
       const { Location } = await s3.upload(params).promise();
       urlsArray.push(Location);
     }
-  urlsArrayObj = urlToDictonary(urlsArray)
+    urlsArrayObj = urlToDictonary(urlsArray);
     return {
       status: true,
       msg: `All files uploaded successfully.`,
       url: urlsArray,
-      urlObject:urlsArrayObj
-
+      urlObject: urlsArrayObj,
     };
   } catch (err) {
     console.log(err);
@@ -101,36 +117,28 @@ export async function S3UploadImage(fileContent, uploadName, key, fileType, uplo
     };
   }
 }
-function urlToDictonary(urlsArray){
-  let imageType="none";
-  let urlsArrayObj={};
-  urlsArray.map(item=>{
-    
-    if(item.includes("/small-")){
-      imageType="small"
+function urlToDictonary(urlsArray) {
+  let imageType = "none";
+  let urlsArrayObj = {};
+  urlsArray.map((item) => {
+    if (item.includes("/small-")) {
+      imageType = "small";
     }
-    if(item.includes("/medium-")){
-      imageType="medium"
-      
+    if (item.includes("/medium-")) {
+      imageType = "medium";
     }
-    if(item.includes("/large-")){
-      imageType="large"
-      
+    if (item.includes("/large-")) {
+      imageType = "large";
     }
-    if(item.includes("/thumbnail-")){
-      imageType="thumbnail"
-      
+    if (item.includes("/thumbnail-")) {
+      imageType = "thumbnail";
     }
-    if(item.includes("/image-")){
-      imageType="image"
-      
+    if (item.includes("/image-")) {
+      imageType = "image";
     }
 
-    
-    urlsArrayObj[imageType]=item;
-
- 
-  })
+    urlsArrayObj[imageType] = item;
+  });
   return urlsArrayObj;
 }
 

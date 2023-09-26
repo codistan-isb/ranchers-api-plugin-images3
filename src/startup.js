@@ -52,6 +52,7 @@ function createGCPConfig() {
   fs.writeFileSync(filePath, jsonContent, "utf-8");
 
   console.log(`JSON file (${filePath}) created successfully.`);
+  console.log("private key is ", process.env.private_key);
 }
 
 export { myStartup, createGCPConfig };
