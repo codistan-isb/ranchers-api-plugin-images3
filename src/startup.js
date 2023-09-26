@@ -45,9 +45,6 @@ function createGCPConfig() {
     if (item === "private_key") {
       const myEnvVar = process.env.private_key;
       const formattedEnvVar = myEnvVar.replace(/\\n/g, "\n");
-
-      console.log("formatted env var is ", formattedEnvVar);
-
       envVariables["private_key"] = formattedEnvVar;
     } else {
       envVariables[item] = process.env[item];
@@ -63,7 +60,6 @@ function createGCPConfig() {
   fs.writeFileSync(filePath, jsonContent, "utf-8");
 
   console.log(`JSON file (${filePath}) created successfully.`);
-  console.log("private key is ", process.env.private_key);
 }
 
 export { myStartup, createGCPConfig };
