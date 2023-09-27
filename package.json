@@ -1,7 +1,7 @@
 {
   "name": "@codistan-isb/bizb-api-plugin-images3",
   "description": "Boilerplate Example plugin for the Reaction API",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "main": "index.js",
   "type": "module",
   "engines": {

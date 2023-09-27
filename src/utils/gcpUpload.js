@@ -104,8 +104,12 @@ export default async function gcpUpload(req, res) {
         new Promise((resolve, reject) => {
           blobStream.on("finish", async (_) => {
             await blob.makePublic();
-            const publicUrl = `${process.env.CANONICAL_URL}${fileURI}`;
-
+            let publicUrl;
+            if (process.env?.CANONICAL_URL) {
+              publicUrl = `${process.env.CANONICAL_URL}${fileURI}`;
+            } else {
+              publicUrl = blob.publicUrl();
+            }
             urls.push(publicUrl);
             availableSizes[name] = publicUrl;
             resolve();
