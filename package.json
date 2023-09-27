@@ -1,7 +1,7 @@
 {
-  "name": "@codistan-isb/bizb-api-plugin-images3",
-  "description": "Boilerplate Example plugin for the Reaction API",
-  "version": "1.2.5",
+  "name": "@codistan-isb/ranchers-api-plugin-images3",
+  "description": "Image upload plugin for the Reaction API",
+  "version": "1.2.6",
   "main": "index.js",
   "type": "module",
   "engines": {
