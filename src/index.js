@@ -99,7 +99,7 @@ function myStartup1(context) {
             })
             .catch(function (err) {
               console.log(err);
-              res.send(err);
+              throw new ReactionError("access-denied", err);
             });
           //return response
         } else if (isMulti == "false") {
@@ -143,7 +143,8 @@ function myStartup1(context) {
         }
       } catch (err) {
         console.log("err", err);
-        res.status(500).send(err);
+        throw new ReactionError("access-denied", err);
+        // res.status(500).send(err);
       }
     });
   }

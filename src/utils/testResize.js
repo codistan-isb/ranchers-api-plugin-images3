@@ -36,7 +36,8 @@ module.exports = async function generateThumbs(url, sku, fallback, product) {
     })
     .catch((e) => {
       // Handle errors here
-      return e;
+      // return e;
+      throw new ReactionError("access-denied", e);
     });
 };
 function downloadHandler(url, i, sku, fallback, product) {
@@ -124,10 +125,12 @@ function downloadHandler(url, i, sku, fallback, product) {
             // console.log("fallback",fallback,i,sku,fallback);
             downloadHandler(fallback, i, sku, fallback);
           }
-          reject();
+          // reject();
+          throw new ReactionError("access-denied", err);
         });
     } catch (err) {
-      reject();
+      // reject();
+      throw new ReactionError("access-denied", err);
     }
   });
 }

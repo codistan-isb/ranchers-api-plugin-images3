@@ -39,7 +39,8 @@ export async function generateThumbs(filename, uploadName, key) {
     })
     .catch((e) => {
       // Handle errors here
-      return e;
+      throw new ReactionError("access-denied", e);
+      // return e;
     });
 }
 
@@ -111,6 +112,7 @@ export async function S3UploadImage(
     };
   } catch (err) {
     console.log(err);
+    // throw new ReactionError("access-denied", err);
     return {
       status: false,
       msg: err.message,
@@ -172,8 +174,9 @@ export async function S3UploadDocument(fileContent, uploadName, key) {
       });
     } catch (err) {
       console.log("S3 Upload Handler");
-      console.log(err);
-      reject(err);
+      throw new ReactionError("access-denied", err);
+      // console.log(err);
+      // reject(err);
     }
   });
 }

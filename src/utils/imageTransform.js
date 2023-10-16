@@ -22,6 +22,7 @@ function imageTransformAndUpload(fileContent, thumbIndex, uploadName, key) {
       .catch((err) => {
         console.log("reaching catch ");
         console.log("error is ", err);
+        throw new ReactionError("access-denied", err);
       });
   });
 }

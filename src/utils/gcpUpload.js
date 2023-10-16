@@ -137,5 +137,6 @@ export default async function gcpUpload(req, res) {
     });
   } catch (err) {
     console.log("gcp upload error is ", err);
+    throw new ReactionError("access-denied", err);
   }
 }
