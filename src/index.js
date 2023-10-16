@@ -4,6 +4,7 @@ import importAsString from "@reactioncommerce/api-utils/importAsString.js";
 import fileUpload from "express-fileupload";
 import cors from "cors";
 import bodyParser from "body-parser";
+import ReactionError from "@reactioncommerce/reaction-error";
 import morgan from "morgan";
 import _ from "lodash";
 import gcpUpload from "./utils/gcpUpload.js";

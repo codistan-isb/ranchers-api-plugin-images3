@@ -1,6 +1,7 @@
 import fs from "fs";
 import AWS from "aws-sdk";
 import sharp from "sharp";
+import ReactionError from "@reactioncommerce/reaction-error";
 const BUCKET_NAME = process.env.BUCKET_NAME;
 const s3 = new AWS.S3({
   accessKeyId: process.env.ID,
@@ -163,7 +164,8 @@ export async function S3UploadDocument(fileContent, uploadName, key) {
         console.log("data is ", data, "iteration no. ", i);
         if (err) {
           console.log("reaching error");
-          reject(err);
+          // reject(err);
+          throw new ReactionError("access-denied", err);
         }
         resolve({
           status: true,

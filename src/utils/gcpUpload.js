@@ -1,4 +1,5 @@
 import { createRequire } from "module";
+import ReactionError from "@reactioncommerce/reaction-error";
 const require = createRequire(import.meta.url);
 const path = require("path");
 import { fileURLToPath } from "url";

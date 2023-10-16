@@ -3,6 +3,8 @@ const sharp = require("sharp");
 const fs = require("fs");
 const AWS = require("aws-sdk");
 const uploadFile = require("./s3Handler");
+import ReactionError from "@reactioncommerce/reaction-error";
+
 // Enter copied or downloaded access ID and secret key here
 const imgTransforms = [
   {
