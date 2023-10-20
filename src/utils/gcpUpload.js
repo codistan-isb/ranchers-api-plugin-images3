@@ -41,15 +41,18 @@ export default async function gcpUpload(req, res) {
     return;
   }
 
-  const storageObject = new Storage({
-    keyFilename: path.join(
-      __dirname,
-      "../",
-      "configs",
-      "key-file-from-service-account.json"
-    ),
-  });
+  // const storageObject = new Storage({
+  //   keyFilename: path.join(
+  //     __dirname,
+  //     "../",
+  //     "configs",
+  //     "key-file-from-service-account.json"
+  //   ),
+  // });
 
+  const storageObject = new Storage({
+    keyFilename: path.join(__dirname, "../", "specific_env_variables.json"),
+  });
   const bucket = storageObject.bucket(bucketName);
 
   let data = [];
