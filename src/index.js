@@ -281,3 +281,8 @@ export default async function register(app) {
     },
   });
 }
+
+
+ // const storageObject = new Storage({
+    //   keyFilename: path.join(__dirname, "../", "specific_env_variables.json"),
+    // });

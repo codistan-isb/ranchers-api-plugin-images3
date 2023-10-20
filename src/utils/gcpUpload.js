@@ -1,5 +1,4 @@
 import { createRequire } from "module";
-import ReactionError from "@reactioncommerce/reaction-error";
 const require = createRequire(import.meta.url);
 const path = require("path");
 import { fileURLToPath } from "url";
@@ -32,112 +31,88 @@ let imgTransforms = [
 const upload = multer({ storage: multer.memoryStorage() });
 
 export default async function gcpUpload(req, res) {
-  try {
-    //   console.log("req", req);
-    let file = req.files.photos;
-    console.log("file name is ", file.name);
-
-    let isMulti = req.body.isMulti;
-    let uploadPath = req.body.uploadPath;
-    let uploadName = file.name;
-    //   console.log("file ", file);
-
-    const currentTime = Date.now();
-    if (!file) {
-      res.status(400).send("No file uploaded.");
-      return;
-    }
-
-    // const storageObject = new Storage({
-    //   keyFilename: path.join(
-    //     __dirname,
-    //     "../",
-    //     "configs",
-    //     "key-file-from-service-account.json"
-    //   ),
-    // });
-
-    const storageObject = new Storage({
-      keyFilename: path.join(__dirname, "../", "specific_env_variables.json"),
-    });
-
-    const bucket = storageObject.bucket(bucketName);
-
-    let data = [];
-    let urls = [];
-    let availableSizes = {};
-    let uploads = [];
-
-    for (let i = 0; i < 4; i++) {
-      let name = imgTransforms[i].name;
-      let { size, fit, format, type } = imgTransforms[i].transform;
-      const resizedImage = await sharp(file.data)
-        .resize({
-          height: size,
-          fit: sharp.fit[fit],
-          withoutEnlargement: true,
-        })
-        .webp({ lossless: true, alphaQuality: 50, quality: 80 })
-        .toBuffer();
-      // console.log("name ", `${req.body.uploadPath}${name}-${file.name}`);
-      const fileURI = `${uploadPath}${name}-${currentTime}-${
-        uploadName.split(".")[0]
-      }.webp`;
-      const blob = bucket.file(fileURI);
-
-      console.log("blob created is ", blob);
-
-      const blobStream = blob.createWriteStream({
-        metadata: {
-          contentType: file.mimetype,
-        },
-        public: true,
-      });
-
-      blobStream.on("error", (err) => {
-        console.log("err here", err);
-        res.status(500).json({
-          error: err,
-        });
-      });
-
-      uploads.push(
-        new Promise((resolve, reject) => {
-          blobStream.on("finish", async (_) => {
-            await blob.makePublic();
-            let publicUrl;
-            if (process.env?.CANONICAL_URL) {
-              publicUrl = `${process.env.CANONICAL_URL}${fileURI}`;
-            } else {
-              publicUrl = blob.publicUrl();
-            }
-            urls.push(publicUrl);
-            availableSizes[name] = publicUrl;
-            resolve();
-          });
-          blobStream.end(resizedImage);
-        })
-      );
-    }
-
-    await Promise.all(uploads);
-
-    data.push({
-      name: file.name,
-      mimetype: file.mimetype,
-      size: file.size,
-      url: urls,
-      availableSizes: availableSizes,
-    });
-
-    res.status(200).json({
-      code: 200,
-      status: true,
-      message: "File is uploaded!!!",
-      data: data,
-    });
-  } catch (err) {
-    console.log("gcp upload error is ", err);
-    throw new ReactionError("access-denied", err);
+  //   console.log("req", req);
+  let file = req.files.photos;
+  let isMulti = req.body.isMulti;
+  let uploadPath = req.body.uploadPath;
+  //   console.log("file ", file);
+  if (!file) {
+    res.status(400).send("No file uploaded.");
+    return;
   }
+
+  const storageObject = new Storage({
+    keyFilename: path.join(
+      __dirname,
+      "../",
+      "configs",
+      "key-file-from-service-account.json"
+    ),
+  });
+
+  const bucket = storageObject.bucket(bucketName);
+
+  let data = [];
+  let urls = [];
+  let availableSizes = {};
+  let uploads = [];
+
+  for (let i = 0; i < 4; i++) {
+    let name = imgTransforms[i].name;
+    let { size, fit, format, type } = imgTransforms[i].transform;
+    const resizedImage = await sharp(file.data)
+      .resize({
+        height: size,
+        fit: sharp.fit[fit],
+        withoutEnlargement: true,
+      })
+      .webp({ lossless: false, alphaQuality: 50, quality: 80 })
+      .toBuffer();
+    // console.log("name ", `${req.body.uploadPath}${name}-${file.name}`);
+    const blob = bucket.file(`${req.body.uploadPath}${name}-${file.name}`);
+
+    const blobStream = blob.createWriteStream({
+      metadata: {
+        contentType: file.mimetype,
+      },
+      public: true,
+    });
+
+    blobStream.on("error", (err) => {
+      console.log("err here", err);
+      res.status(500).json({
+        error: err,
+      });
+    });
+
+    uploads.push(
+      new Promise((resolve, reject) => {
+        blobStream.on("finish", async (_) => {
+          await blob.makePublic();
+          const publicUrl = blob.publicUrl();
+          urls.push(publicUrl);
+          availableSizes[name] = publicUrl;
+          resolve();
+        });
+        blobStream.end(resizedImage);
+      })
+    );
+  }
+
+  await Promise.all(uploads);
+
+  data.push({
+    name: file.name,
+    mimetype: file.mimetype,
+    size: file.size,
+    url: urls,
+    availableSizes: availableSizes,
+  });
+
+  res.status(200).json({
+    code: 200,
+    status: true,
+    message: "File is uploaded!!!",
+    data: data,
+  });
 }
