@@ -13,15 +13,19 @@ const promises = [];
 const imgTransforms = [
   {
     name: "image",
-    transform: { size: 1600, fit: "inside", format: "jpg", type: "image/jpeg" },
+    transform: { size: 1600, fit: "inside", format: "webp", type: "image/webp" },
   },
   {
     name: "large",
-    transform: { size: 1000, fit: "inside", format: "jpg", type: "image/jpeg" },
+    transform: { size: 1000, fit: "inside", format: "webp", type: "image/webp" },
+  },
+  {
+    name: "original",
+    transform: { size: 1800, fit: "inside", format: "webp", type: "image/webp" },
   },
   {
     name: "medium",
-    transform: { size: 600, fit: "inside", format: "jpg", type: "image/jpeg" },
+    transform: { size: 600, fit: "inside", format: "webp", type: "image/webp" },
   },
   {
     name: "thumbnail",
@@ -60,6 +64,7 @@ export async function S3UploadImage(
       large: {},
       medium: {},
       small: {},
+      original: {},
       thumbnail: {},
     };
     if (fileType === "image") {
@@ -76,11 +81,9 @@ export async function S3UploadImage(
             .toBuffer();
         })
       );
-
       await Promise.all(
         resizedImages.map(async (image, index) => {
           console.log("map count is ", image);
-
           const params = {
             Bucket: BUCKET_NAME,
             Key: `${uploadPath}/${imgTransforms[index].name}-${currentTime}-${
@@ -89,9 +92,7 @@ export async function S3UploadImage(
             Body: image,
           };
           const { Location } = await s3.upload(params).promise();
-
           console.log("location is ", index, Location);
-
           urlsArray.push(Location);
         })
       );
@@ -126,6 +127,9 @@ function urlToDictonary(urlsArray) {
   urlsArray.map((item) => {
     if (item.includes("/small-")) {
       imageType = "small";
+    }
+    if (item.includes("/original-")) {
+      imageType = "original";
     }
     if (item.includes("/medium-")) {
       imageType = "medium";

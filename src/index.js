@@ -48,7 +48,6 @@ function myStartup1(context) {
       let uploadPath = req.body.uploadPath;
       console.log("upload path is ", uploadPath);
       let uploads = [];
-
       sharp.cache(false);
       try {
         if (!req.files) {
